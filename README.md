@@ -68,7 +68,7 @@ If you want to retain styling for the log format but don’t plan on using styli
 Disabling this option will decrease the execution time of the logging function as well, though disabling `ansi_styling` is the best option if execution speed is absolutely critical.
 
 > [!NOTE]
-> Even with these options enabled, the logging functions are still quite fast. When using serial over USB on the RP2040 with styling tags and variable replacement formatting, a typical log format (`[%TSTMP%] [%LVL%] [%FUNC%:%LINE%] [%GRN%%BOLD%%TASK%%RST%]: %MSG%`), and this log message: `Task 1 heartbeat... iter: %YLW%%u%RST%, l-exec-t: %RED%%u%RST%us`, I measured an average total execution time of around 400~450 microseconds. This was with GCC 13, and compiler optimizations were enabled.
+> Even with these options enabled, the logging functions are still quite fast. When using serial over USB on the RP2040 with styling tags and variable substitutions, a typical log format (`[%TSTMP%] [%LVL%] [%FUNC%:%LINE%] [%GRN%%BOLD%%TASK%%RST%]: %MSG%`), and this log message: `Task 1 heartbeat... iter: %YLW%%u%RST%, l-exec-t: %RED%%u%RST%us`, I measured an average total execution time of around 400~450 microseconds. This was with GCC 13.2.1, and compiler optimizations were enabled.
 
 <br>
 
