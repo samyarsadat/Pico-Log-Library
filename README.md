@@ -85,7 +85,7 @@ It is recommended for you to define a logging macro so that you don’t have to 
 
 ```cpp
 // Instead of this:
-logger.log(__func__, __FILE__, __LINE__, LOG_LVL_INFO, “Hello world!”);
+logger.log(__func__, __FILE__, __LINE__, LOG_LVL_INFO, "Hello world!");
 
 // You can define a macro:
 #define LOG(lvl, msg, ...) logger.log(__func__, __FILE__, __LINE__, lvl, msg, ##__VA_ARGS__);
