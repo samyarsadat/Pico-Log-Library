@@ -18,9 +18,6 @@
 #  along with this program.  If not, see <https: www.gnu.org/licenses/>.
 
 
-# Set minimum required version of CMake
-cmake_minimum_required(VERSION 3.12)
-
 # Add source files
 add_library(${PROJECT_NAME} logger.c++)
 
@@ -33,9 +30,9 @@ target_link_libraries(${PROJECT_NAME} pico_stdlib)
 if (PICO_LOG_FREERTOS)
     target_link_libraries(${PROJECT_NAME} FreeRTOS-Kernel)
     target_compile_definitions(${PROJECT_NAME} PRIVATE PICO_LOG_FREERTOS=1)
-else()
+else ()
     target_link_libraries(${PROJECT_NAME} pico_sync)
-endif()
+endif ()
 
 # Enable all warnings
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic)

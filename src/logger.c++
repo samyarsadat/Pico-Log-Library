@@ -28,13 +28,6 @@
 Logger::Logger(stdio_driver_t* stdio_driver, logger_options_t* options) {
     assert(stdio_driver != nullptr);
     assert(options != nullptr);
-
-    #ifdef PICO_LOG_FREERTOS
-    this->log_mutex = xSemaphoreCreateMutex();
-    assert(this->log_mutex != nullptr);  // There isn't much we can do if mutex creation fails...
-    #else
-    mutex_init(&this->log_mutex);
-    #endif
     
     this->stdio_driver = stdio_driver;
     this->options = options;
@@ -51,6 +44,24 @@ Logger::~Logger() {
         this->log_mutex = nullptr;
     }
     #endif
+}
+
+bool Logger::init_mutex() {
+    #ifdef PICO_LOG_FREERTOS
+    if (this->log_mutex == nullptr) {
+        this->log_mutex = xSemaphoreCreateMutex();
+        if (this->log_mutex == nullptr) {
+            return false;
+        }
+    }
+    #else
+    if (!this->mutex_initialized) {
+        mutex_init(&this->log_mutex);
+        this->mutex_initialized = true;
+    }
+    #endif
+
+    return true;
 }
 
 void Logger::log(const char* func, const char* file, const uint16_t line, LOG_LEVEL level, const char* message, ...) {
@@ -80,22 +91,36 @@ void Logger::vlog(LOG_LEVEL level, const char* message, va_list args,
     }
 }
 
+void Logger::reparse_format() {
+    if (this->take_log_mutex()) {
+        this->clear_format_tokens();
+        this->msg_format_tokenize();
+        this->release_log_mutex();
+    }
+}
+
 
 /* ---- PRIVATE ---- */
 inline bool Logger::take_log_mutex() {
     #ifdef PICO_LOG_FREERTOS
-    return xSemaphoreTake(log_mutex, portMAX_DELAY) == pdTRUE;
+    return log_mutex == nullptr || xSemaphoreTake(log_mutex, portMAX_DELAY) == pdTRUE;
     #else
-    mutex_enter_blocking(&this->log_mutex);
+    if (this->mutex_initialized) {
+        mutex_enter_blocking(&this->log_mutex);
+    }
     return true;
     #endif
 }
 
 inline void Logger::release_log_mutex() {
     #ifdef PICO_LOG_FREERTOS
-    xSemaphoreGive(log_mutex);
+    if (log_mutex != nullptr) {
+        xSemaphoreGive(log_mutex);
+    }
     #else
-    mutex_exit(&this->log_mutex);
+    if (this->mutex_initialized) {
+        mutex_exit(&this->log_mutex);
+    }
     #endif
 }
 
@@ -158,21 +183,23 @@ inline Logger::color_spec_t Logger::process_color_spec(const COLOR color, const 
     return clr_spec;
 }
 
-#define ADD_FORMAT_TOKEN(tkn_type, ptr_skip)            \
-    this->log_format_tokens[token_num].type = tkn_type; \
-    token_num++;                                        \
-    src_ptr += ptr_skip;                                \
+#define ADD_FORMAT_TOKEN(tkn_type, ptr_skip)                \
+    if (this->options->ansi_styling) {                      \
+        this->log_format_tokens[token_num].type = tkn_type; \
+        token_num++;                                        \
+    }                                                       \
+    src_ptr += ptr_skip;                                    \
     continue;
 
 #define ADD_FORMAT_TOKEN_STL(ansi_style, ptr_skip)             \
     this->log_format_tokens[token_num].ansi_code = ansi_style; \
     ADD_FORMAT_TOKEN(FORMAT_TOKEN_STYLE, ptr_skip);
 
-#define ADD_FORMAT_TOKEN_CLR(color, ptr_skip)                   \
-    clr_spec = process_color_spec(color, src_ptr, ptr_skip);    \
-    if (clr_spec.success) {                                     \
-        this->log_format_tokens[token_num].clr_spec = clr_spec; \
-        ADD_FORMAT_TOKEN(FORMAT_TOKEN_COLOR, 0);                \
+#define ADD_FORMAT_TOKEN_CLR(color, ptr_skip)                                      \
+    clr_spec = process_color_spec(color, src_ptr, ptr_skip);                       \
+    if (clr_spec.success) {                                                        \
+        this->log_format_tokens[token_num].color_code = ansi_color_code(clr_spec); \
+        ADD_FORMAT_TOKEN(FORMAT_TOKEN_COLOR, 0);                                   \
     }
 
 void Logger::msg_format_tokenize() {
@@ -325,15 +352,9 @@ inline size_t Logger::msg_process_format(char* buff, const size_t buff_size, con
                 buff_pos += token_len;
                 continue;
             case FORMAT_TOKEN_STYLE:
-                if (this->options->ansi_styling) {
-                    BUFFER_CONCAT(this->log_format_tokens[i].ansi_code);
-                }
-                break;
+                BUFFER_CONCAT(this->log_format_tokens[i].ansi_code);
             case FORMAT_TOKEN_COLOR:
-                if (this->options->ansi_styling) {
-                    BUFF_SPRINTF("\033[0;%dm", ansi_color_code(this->log_format_tokens[i].clr_spec));
-                }
-                break;
+                BUFF_SPRINTF("\033[0;%dm", this->log_format_tokens[i].color_code);
             case FORMAT_TOKEN_FUNC:
                 BUFFER_CONCAT(func);
             case FORMAT_TOKEN_FILE:
@@ -369,20 +390,18 @@ inline size_t Logger::msg_process_format(char* buff, const size_t buff_size, con
     }
 
     exit_loop:
-    if (buff_size >= buff_pos) {
+    if (buff_pos < buff_size - 1) {
         buff[buff_pos]     = '\r';
         buff[buff_pos + 1] = '\n';
-        buff[buff_pos + 2] = '\0';
         return buff_pos + 2;
     }
 
-    if (buff_pos >= 2) {
-        buff[buff_pos - 2] = '\r';
-        buff[buff_pos - 1] = '\n';
-        buff[buff_pos]     = '\0';
+    if (buff_pos >= 1) {
+        buff[buff_pos - 1] = '\r';
+        buff[buff_pos] = '\n';
     }
 
-    return buff_pos;
+    return buff_pos + 1;
 }
 
 #define PROCESS_COLOR_SPEC(color, ptr_skip)                   \
@@ -392,11 +411,10 @@ inline size_t Logger::msg_process_format(char* buff, const size_t buff_size, con
     }
 
 inline void Logger::msg_process_style(const char* src_ptr, char* buff, const size_t buff_size) {
-    const size_t buff_size_n = buff_size - 1;
     color_spec_t clr_spec;
     size_t buff_pos_size_n, str_len, buff_pos = 0;
     
-    while (*src_ptr && buff_pos < buff_size_n) {
+    while (*src_ptr && buff_pos < buff_size) {
         if (*src_ptr == '%') {
             src_ptr++;
 

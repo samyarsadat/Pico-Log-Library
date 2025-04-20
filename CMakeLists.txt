@@ -36,6 +36,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Library options
 option(PICO_LOG_FREERTOS "Enable FreeRTOS support" OFF)
+#option(BUILD_EXAMPLES "Build examples" OFF)
 
 # Initialize the Pico SDK
 pico_sdk_init()

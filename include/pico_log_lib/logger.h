@@ -65,33 +65,6 @@ enum LOG_LEVEL {
 // Logger options structure.
 struct logger_options {
     LOG_LEVEL logging_level = LOG_LVL_DEBUG;
-    /*
-        Log format string replace options:
-        %TSTMP% : TIMESTAMP
-        %LVL%   : LOG LEVEL
-        %FILE%  : FILE NAME
-        %LINE%  : LINE NUMBER
-        %FUNC%  : FUNCTION NAME
-        %TASK%  : TASK NAME
-        %MSG%   : LOG MESSAGE
-
-        Style options:
-        %BLK%   : COLOR BLACK
-        %WHT%   : COLOR WHITE
-        %RED%   : COLOR RED
-        %GRN%   : COLOR GREEN
-        %YLW%   : COLOR YELLOW
-        %BLU%   : COLOR BLUE
-        %MGT%   : COLOR MAGENTA
-        %CYN%   : COLOR CYAN
-        %BOLD%  : STYLE BOLD
-        %UDRLN% : STYLE UNDERLINE
-        %STKTHR%: STYLE STRIKETHROUGH
-        %ITL%   : STYLE ITALIC
-        %RST%   : STYLE/COLOR RESET
-
-        All color specifiers can be used with _BG and _HI suffixes.
-    */
     const char* log_format = "[%TIMESTAMP%] [%LEVEL%] [%FILE%:%LINE%]: %MSG%";
     bool ansi_styling = true;
     bool process_style_tags = true;
@@ -108,10 +81,12 @@ class Logger {
         Logger(stdio_driver_t* stdio_driver, logger_options_t* options);
         ~Logger();
 
+        bool init_mutex();
         void log(const char* func, const char* file, const uint16_t line, 
                  LOG_LEVEL level, const char* message, ...);
         void vlog(LOG_LEVEL level, const char* message, va_list args, 
                   const char* func, const char* file, const uint16_t line);
+        void reparse_format();
     
     private:
         stdio_driver_t* stdio_driver;
@@ -120,6 +95,7 @@ class Logger {
         #ifdef PICO_LOG_FREERTOS
         SemaphoreHandle_t log_mutex;
         #else
+        bool mutex_initialized = false;
         mutex_t log_mutex;
         #endif
 
@@ -163,10 +139,10 @@ class Logger {
         // Log format pre-parser token structure.
         struct log_format_token {
             LOG_FORMAT_TOKEN_TYPE type = FORMAT_TOKEN_END;
+            uint8_t color_code = 0;
             const char* ansi_code = nullptr;
             const char* txt_token_ptr = nullptr;
             size_t txt_token_len = 0;
-            color_spec_t clr_spec = {COLOR_WHITE, false, false, false};
         };
         typedef struct log_format_token log_format_token_t;
 
