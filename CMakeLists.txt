@@ -19,7 +19,7 @@
 
 
 # Set minimum required version of CMake
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 # Check whether PICO_SDK_PATH is defined.
 if (NOT EXISTS $ENV{PICO_SDK_PATH})
@@ -35,14 +35,27 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
 # Library options
+cmake_policy(SET CMP0077 NEW)
 option(PICO_LOG_FREERTOS "Enable FreeRTOS support" OFF)
-#option(BUILD_EXAMPLES "Build examples" OFF)
+option(PICO_LOG_BUILD_EXAMPLES "Build examples" OFF)
 
 # Initialize the Pico SDK
 pico_sdk_init()
 
-# Add source subdirectory
+# This is intended for example builds!
+if (NOT DEFINED FREERTOS_KERNEL_PATH AND PICO_LOG_FREERTOS AND PICO_LOG_BUILD_EXAMPLES)
+    # Include the FreeRTOS Kernel
+    set(FREERTOS_KERNEL_PATH "${CMAKE_CURRENT_LIST_DIR}/libfreertos/FreeRTOS-Kernel" CACHE STRING "FreeRTOS Kernel Path" FORCE)
+    include(FreeRTOS_Kernel_import.cmake)
+
+    # FreeRTOS config
+    set(FREERTOS_CONFIG_DIR "${CMAKE_CURRENT_LIST_DIR}/libfreertos/Config" CACHE STRING "FreeRTOS Config Path" FORCE)
+    include_directories("${FREERTOS_CONFIG_DIR}")
+endif ()
+
+# Add source subdirectories
 add_subdirectory(src)
+add_subdirectory(examples)
 
 # CMake flags
 set(FLAGS "-mthumb -ffunction-sections -fdata-sections")

@@ -43,7 +43,7 @@
 // This value is used to limit the number of tokens that can be processed in the log format string.
 // The actual number of tokens in the log format string may be less than this value.
 #ifndef LOG_FORMAT_MAX_TOKENS 
-    #define LOG_FORMAT_MAX_TOKENS 15
+    #define LOG_FORMAT_MAX_TOKENS 16
 #endif
 
 // ANSI escape code constants.
@@ -131,6 +131,7 @@ class Logger {
             FORMAT_TOKEN_FILE,
             FORMAT_TOKEN_LINE,
             FORMAT_TOKEN_TASK,
+            FORMAT_TOKEN_CORE,
             FORMAT_TOKEN_LEVEL,
             FORMAT_TOKEN_TIMESTAMP,
             FORMAT_TOKEN_MSG,
@@ -140,8 +141,7 @@ class Logger {
         struct log_format_token {
             LOG_FORMAT_TOKEN_TYPE type = FORMAT_TOKEN_END;
             uint8_t color_code = 0;
-            const char* ansi_code = nullptr;
-            const char* txt_token_ptr = nullptr;
+            const char* str_ptr = nullptr;
             size_t txt_token_len = 0;
         };
         typedef struct log_format_token log_format_token_t;

@@ -191,8 +191,8 @@ inline Logger::color_spec_t Logger::process_color_spec(const COLOR color, const 
     src_ptr += ptr_skip;                                    \
     continue;
 
-#define ADD_FORMAT_TOKEN_STL(ansi_style, ptr_skip)             \
-    this->log_format_tokens[token_num].ansi_code = ansi_style; \
+#define ADD_FORMAT_TOKEN_STL(ansi_style, ptr_skip)           \
+    this->log_format_tokens[token_num].str_ptr = ansi_style; \
     ADD_FORMAT_TOKEN(FORMAT_TOKEN_STYLE, ptr_skip);
 
 #define ADD_FORMAT_TOKEN_CLR(color, ptr_skip)                                      \
@@ -287,6 +287,8 @@ void Logger::msg_format_tokenize() {
                 case 'C':
                     if (memcmp(src_ptr, "CYN", 3) == 0) {
                         ADD_FORMAT_TOKEN_CLR(COLOR_CYAN, 3);
+                    } else if (memcmp(src_ptr, "CORE%", 5) == 0) {
+                        ADD_FORMAT_TOKEN(FORMAT_TOKEN_CORE, 5);
                     }
                     break;
                 case 'W':
@@ -301,7 +303,7 @@ void Logger::msg_format_tokenize() {
             
         if (this->log_format_tokens[token_num].type != FORMAT_TOKEN_TEXT) {
             this->log_format_tokens[token_num].type = FORMAT_TOKEN_TEXT;
-            this->log_format_tokens[token_num].txt_token_ptr = src_ptr;
+            this->log_format_tokens[token_num].str_ptr = src_ptr;
             this->log_format_tokens[token_num].txt_token_len = 1;
         } else {
             this->log_format_tokens[token_num].txt_token_len++;
@@ -348,11 +350,11 @@ inline size_t Logger::msg_process_format(char* buff, const size_t buff_size, con
                     token_len += str_len_diff;
                 }
                 
-                memcpy(buff + buff_pos, this->log_format_tokens[i].txt_token_ptr, token_len);
+                memcpy(buff + buff_pos, this->log_format_tokens[i].str_ptr, token_len);
                 buff_pos += token_len;
                 continue;
             case FORMAT_TOKEN_STYLE:
-                BUFFER_CONCAT(this->log_format_tokens[i].ansi_code);
+                BUFFER_CONCAT(this->log_format_tokens[i].str_ptr);
             case FORMAT_TOKEN_COLOR:
                 BUFF_SPRINTF("\033[0;%dm", this->log_format_tokens[i].color_code);
             case FORMAT_TOKEN_FUNC:
@@ -382,6 +384,12 @@ inline size_t Logger::msg_process_format(char* buff, const size_t buff_size, con
                 timestamp_sec = ms_since_boot / 1000;
                 timestamp_millisec = ms_since_boot - (timestamp_sec * 1000);
                 BUFF_SPRINTF("%lu.%03u", timestamp_sec, timestamp_millisec);
+            case FORMAT_TOKEN_CORE:
+                if (get_core_num()) {
+                    BUFFER_CONCAT("core1");
+                } else {
+                    BUFFER_CONCAT("core0");
+                }
             case FORMAT_TOKEN_MSG:
                 BUFFER_CONCAT(msg);
             case FORMAT_TOKEN_END:
