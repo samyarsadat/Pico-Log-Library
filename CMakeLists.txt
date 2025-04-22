@@ -39,6 +39,12 @@ cmake_policy(SET CMP0077 NEW)
 option(PICO_LOG_FREERTOS "Enable FreeRTOS support" OFF)
 option(PICO_LOG_BUILD_EXAMPLES "Build examples" OFF)
 
+if (PICO_LOG_BUILD_EXAMPLES)
+    # Set Pico Board and Pico Platform
+    set(PICO_PLATFORM rp2040)
+    set(PICO_BOARD pico)
+endif ()
+
 # Initialize the Pico SDK
 pico_sdk_init()
 

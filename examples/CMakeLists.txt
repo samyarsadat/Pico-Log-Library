@@ -19,10 +19,6 @@
 
 
 if (PICO_LOG_BUILD_EXAMPLES)
-    # Set Pico Board and Pico Platform
-    set(PICO_PLATFORM rp2040)
-    set(PICO_BOARD pico)
-
     if (PICO_LOG_FREERTOS)
         # FreeRTOS example    
         add_subdirectory(freertos)
