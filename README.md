@@ -28,6 +28,8 @@ When using FreeRTOS on the Pico, you can set `PICO_LOG_FREERTOS` to `ON` to enab
 
 If you are using FreeRTOS, make sure to properly "include" FreeRTOS in your build configuration (setting `FREERTOS_KERNEL_PATH`, including the FreeRTOS config directory, including the `FreeRTOS_Kernel_import.cmake` file) before adding this library as a subdirectory.
 
+<br>
+
 ## Logger Configuration
 The logger’s configuration options are set using the `logger_options` structure.
 
