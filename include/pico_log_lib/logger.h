@@ -74,7 +74,6 @@ typedef struct logger_options logger_options_t;
 
 /*
     Main logger class.
-    TODO: docs.
 */
 class Logger {
     public:

@@ -1,6 +1,8 @@
-#  The ROS remote project - MicroROS Library Build Workspace Dockerfile
-#  Copyright 2024-2025 Samyar Sadat Akhavi
-#  Prepared by Samyar Sadat Akhavi, 2024-2025.
+#  Pico Log - Devcontainer
+#  A fast logging library for RP2xxx microcontrollers.
+#
+#  Copyright 2025 Samyar Sadat Akhavi.
+#  Written by Samyar Sadat Akhavi, 2025.
 #
 #  This program is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
