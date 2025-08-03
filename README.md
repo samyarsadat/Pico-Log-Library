@@ -164,8 +164,11 @@ Always returns `true` when using Pico SDK mutexes and returns `true` only if the
 
 <br>
 
-### `void reparse_format()`
+### `bool reparse_format()`
 The log format is parsed once upon the creation of the logger object. If the log format or ANSI styling configuration are changed at some point after the creation of the logger object, you must make sure to call `reparse_format()` for the changes to take effect.
+
+**RETURN VALUE:**\
+true if the format was successfully reparsed, false if the mutex could not be acquired.
 
 > [!WARNING]
 > When the log format is parsed, a copy of it is not made. Instead, the parser will reference memory addresses to which the `log_format` points. For this reason, if the log format is changed without immediately calling `reparse_format()`, references to no longer valid memory addresses may be retained.
