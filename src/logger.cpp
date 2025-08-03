@@ -95,7 +95,7 @@ bool Logger::reparse_format() {
         this->clear_format_tokens();
         this->msg_format_tokenize();
         this->release_log_mutex();
-        return true
+        return true;
     }
 
     return false;
