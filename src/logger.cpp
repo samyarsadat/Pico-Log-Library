@@ -74,7 +74,7 @@ void Logger::vlog(LOG_LEVEL_t level, const char* message, va_list args,
                   const char* func, const char* file, const uint16_t line) {
     assert(func != nullptr && file != nullptr && message != nullptr);
     
-    if (this->take_log_mutex() && this->options->logging_level <= level) {
+    if (this->options->logging_level <= level && this->take_log_mutex()) {
         const bool proc_style_tags = this->options->ansi_styling && this->options->process_style_tags;
         const char* message_ptr = proc_style_tags ? this->output_buff : message;
 
