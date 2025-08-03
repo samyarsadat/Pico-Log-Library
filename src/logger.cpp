@@ -16,7 +16,7 @@
     GNU General Public License for more details.
  
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https: www.gnu.org/licenses/>.
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "pico_log_lib/logger.h"
@@ -26,8 +26,7 @@
 
 /* ---- PUBLIC ---- */
 Logger::Logger(stdio_driver_t* stdio_driver, logger_options_t* options) {
-    assert(stdio_driver != nullptr);
-    assert(options != nullptr);
+    assert(stdio_driver != nullptr && options != nullptr);
     
     this->stdio_driver = stdio_driver;
     this->options = options;
@@ -64,18 +63,18 @@ bool Logger::init_mutex() {
     return true;
 }
 
-void Logger::log(const char* func, const char* file, const uint16_t line, LOG_LEVEL level, const char* message, ...) {
-    if (this->options->logging_level <= level) {
-        va_list args;
-        va_start(args, message);
-        this->vlog(level, message, args, func, file, line);
-        va_end(args);
-    }
+void Logger::log(const char* func, const char* file, const uint16_t line, LOG_LEVEL_t level, const char* message, ...) {
+    va_list args;
+    va_start(args, message);
+    this->vlog(level, message, args, func, file, line);
+    va_end(args);
 }
 
-void Logger::vlog(LOG_LEVEL level, const char* message, va_list args, 
+void Logger::vlog(LOG_LEVEL_t level, const char* message, va_list args, 
                   const char* func, const char* file, const uint16_t line) {
-    if (this->take_log_mutex()) {
+    assert(func != nullptr && file != nullptr && message != nullptr);
+    
+    if (this->take_log_mutex() && this->options->logging_level <= level) {
         const bool proc_style_tags = this->options->ansi_styling && this->options->process_style_tags;
         const char* message_ptr = proc_style_tags ? this->output_buff : message;
 
@@ -128,7 +127,7 @@ constexpr uint8_t Logger::ansi_color_code(const color_spec_t clr_spec) {
     return ((uint8_t)clr_spec.color) + 30 + (clr_spec.background ? 10 : 0) + (clr_spec.high_intensity ? 60 : 0);
 }
 
-constexpr const char* Logger::log_lvl_str(const LOG_LEVEL level) {
+constexpr const char* Logger::log_lvl_str(const LOG_LEVEL_t level) {
     switch (level) {
         case LOG_LVL_DEBUG: return "DEBUG";
         case LOG_LVL_INFO:  return "INFO";
@@ -139,7 +138,7 @@ constexpr const char* Logger::log_lvl_str(const LOG_LEVEL level) {
     }
 }
 
-constexpr uint8_t Logger::log_lvl_color(const LOG_LEVEL level) {
+constexpr uint8_t Logger::log_lvl_color(const LOG_LEVEL_t level) {
     switch (level) {
         case LOG_LVL_DEBUG: return ansi_color_code({COLOR_CYAN, false, false, false});
         case LOG_LVL_INFO:  return ansi_color_code({COLOR_BLUE, false, false, false});
@@ -333,7 +332,7 @@ void Logger::clear_format_tokens() {
     }                                                                                      \
     continue;
 
-inline size_t Logger::msg_process_format(char* buff, const size_t buff_size, const char* msg, LOG_LEVEL level, 
+inline size_t Logger::msg_process_format(char* buff, const size_t buff_size, const char* msg, LOG_LEVEL_t level, 
                                          const char* func, const char* file, const uint16_t line) {
     size_t token_len, str_len, buff_pos_size_n, buff_pos = 0;
     uint32_t ms_since_boot, timestamp_sec;

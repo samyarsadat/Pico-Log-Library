@@ -14,13 +14,23 @@ This is a simple and relatively performant logging library for RP2xxx-series mic
 
 The logging format is parsed once upon initialization and tokenized for faster subsequent processing of log messages. ANSI styles and/or style tag interpretation can be optionally disabled if execution speed is a major concern.
 
-It is also important to note that all of the memory required for the format tokens, message buffers, etc. is allocated once upon initialization, and so there are no subsequent memory allocation/de-allocation operations performed during logging.
+It is also important to note that all of the memory required for the format tokens, message buffers, etc. is allocated once upon initialization (well, they're member variables of the `Logger` class itself), and so there are no subsequent memory allocation/de-allocation operations performed during logging.
 
-The logging functions are fully thread-safe.
+The logging functions are fully thread-safe, assuming successful mutex initialization.
 
 <br>
 
 # Library Usage
+## C-only API
+> [!NOTE]
+> New in v0.2.0.
+
+The library now has a C-only API which can be used to achieve all of the same functionality as the C++ class-based API, but from C code. The function documentation can be found [here](include/pico_log_lib/logger_c.h), though it is very similar to the C++ API in most aspects.
+
+New [examples](examples) have also been added, showcasing the C API both with and without FreeRTOS.
+
+<br>
+
 ## Using The Library
 To use this library in your project, you can simply add this repoistory as a submodule and include its directory in your CMake build configuration..
 
@@ -33,17 +43,27 @@ If you are using FreeRTOS, make sure to properly "include" FreeRTOS in your buil
 ## Logger Configuration
 The logger’s configuration options are set using the `logger_options` structure.
 
-```cpp
-struct logger_options {
-    LOG_LEVEL logging_level = LOG_LVL_DEBUG;
-    const char* log_format = "[%TIMESTAMP%] [%LEVEL%] [%FILE%:%LINE%]: %MSG%";
-    bool ansi_styling = true;
-    bool process_style_tags = true;
-};
+```c
+typedef struct {
+    LOG_LEVEL logging_level;
+    const char* log_format;
+    bool ansi_styling;
+    bool process_style_tags;
+} logger_options_t;
 ```
 
 `LOG_LEVEL logging_level`:\
-The minimum severity required for a message to be logged.
+The minimum severity required for a message to be logged.\
+Note that the following verbosity levels are available:
+```c
+typedef enum {
+    LOG_LVL_DEBUG, 
+    LOG_LVL_INFO, 
+    LOG_LVL_WARN, 
+    LOG_LVL_ERROR, 
+    LOG_LVL_FATAL
+} LOG_LEVEL_t;
+```
 
 `const char* log_format`:\
 The format for log messages. Certain special tags can be used here for getting timestamps, log level, etc.

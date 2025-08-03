@@ -19,7 +19,7 @@
 
 
 # Add source files
-add_library(${PROJECT_NAME} logger.c++)
+add_library(${PROJECT_NAME} logger.cpp c_api.cpp)
 
 # Include header files
 target_include_directories(${PROJECT_NAME} PUBLIC ../include)

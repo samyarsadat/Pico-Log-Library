@@ -16,12 +16,13 @@
     GNU General Public License for more details.
  
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <https: www.gnu.org/licenses/>.
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 #pragma once
 #include "pico/stdlib.h"
 #include "pico/stdio/driver.h"
+#include "pico_log_lib/internal/common.h"
 
 #ifdef PICO_LOG_FREERTOS
 #include "FreeRTOS.h"
@@ -53,24 +54,6 @@ constexpr const char* ANSI_UNDERLINE = "\033[4m";
 constexpr const char* ANSI_STRIKETHROUGH = "\033[9m";
 constexpr const char* ANSI_ITALIC = "\033[3m";
 
-// Logger verbosity levels.
-enum LOG_LEVEL {
-    LOG_LVL_DEBUG, 
-    LOG_LVL_INFO, 
-    LOG_LVL_WARN, 
-    LOG_LVL_ERROR, 
-    LOG_LVL_FATAL
-};
-
-// Logger options structure.
-struct logger_options {
-    LOG_LEVEL logging_level = LOG_LVL_DEBUG;
-    const char* log_format = "[%TIMESTAMP%] [%LEVEL%] [%FILE%:%LINE%]: %MSG%";
-    bool ansi_styling = true;
-    bool process_style_tags = true;
-};
-typedef struct logger_options logger_options_t;
-
 
 /*
     Main logger class.
@@ -82,8 +65,8 @@ class Logger {
 
         bool init_mutex();
         void log(const char* func, const char* file, const uint16_t line, 
-                 LOG_LEVEL level, const char* message, ...);
-        void vlog(LOG_LEVEL level, const char* message, va_list args, 
+                 LOG_LEVEL_t level, const char* message, ...);
+        void vlog(LOG_LEVEL_t level, const char* message, va_list args, 
                   const char* func, const char* file, const uint16_t line);
         void reparse_format();
     
@@ -154,11 +137,11 @@ class Logger {
         void clear_format_tokens();
         
         inline color_spec_t process_color_spec(const COLOR color, const char* &src_ptr, const size_t ptr_skip);
-        inline size_t msg_process_format(char* buff, const size_t buff_size, const char* msg, LOG_LEVEL level, 
+        inline size_t msg_process_format(char* buff, const size_t buff_size, const char* msg, LOG_LEVEL_t level, 
                                          const char* func, const char* file, const uint16_t line);
         inline void msg_process_style(const char* src_ptr, char* buff, const size_t buff_size);
         
-        constexpr const char* log_lvl_str(const LOG_LEVEL level);
-        constexpr uint8_t log_lvl_color(const LOG_LEVEL level);
+        constexpr const char* log_lvl_str(const LOG_LEVEL_t level);
+        constexpr uint8_t log_lvl_color(const LOG_LEVEL_t level);
         constexpr uint8_t ansi_color_code(const color_spec_t clr_spec);
 };

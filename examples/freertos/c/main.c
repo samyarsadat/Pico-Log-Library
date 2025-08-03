@@ -1,5 +1,5 @@
 /*
-    Pico Log - FreeRTOS Example
+    Pico Log - FreeRTOS Example (C API)
     A fast logging library for RP2xxx microcontrollers.
     
     Copyright 2025 Samyar Sadat Akhavi.
@@ -20,19 +20,19 @@
 */
 
 #include "pico/stdlib.h"
-#include "pico_log_lib/logger.h"
+#include "pico_log_lib/logger_c.h"
 #include "FreeRTOS.h"
 #include "task.h"
 
 
 // FreeRTOS hooks
-void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName)
-{
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char* pcTaskName) {
+    (void) xTask;
+    (void) pcTaskName;
     panic("Stack overflow!");
 }
 
-void vApplicationMallocFailedHook()
-{
+void vApplicationMallocFailedHook() {
     panic("Memory allocation failed!");
 }
 
@@ -46,11 +46,12 @@ logger_options_t logger_options = {
 };
 
 // Logger initialization with USB stdio driver & logging macro
-Logger logger(&stdio_usb, &logger_options);
-#define LOG(lvl, msg, ...) logger.log(__func__, __FILE__, __LINE__, lvl, msg, ##__VA_ARGS__);
+logger_handle_t logger = NULL;
+#define LOG(lvl, msg, ...) logger_log(logger, __func__, __FILE__, __LINE__, lvl, msg, ##__VA_ARGS__);
 
 // Multi-threaded logging example
 void log_task1(void* arg) {
+    (void) arg;
     size_t counter = 0;
     uint32_t start_time, elapsed_time = 0;
 
@@ -64,6 +65,7 @@ void log_task1(void* arg) {
 }
 
 void log_task2(void* arg) {
+    (void) arg;
     size_t counter = 0;
     uint32_t start_time, elapsed_time = 0;
     
@@ -79,6 +81,7 @@ void log_task2(void* arg) {
 
 int main() {
     stdio_init_all();
+    logger = logger_init(&stdio_usb, &logger_options);
 
     // Wait for USB connection
     while (!stdio_usb_connected()) {
@@ -98,12 +101,12 @@ int main() {
 
     // Example: changing the log format after initialization
     logger_options.log_format = "[%TSTMP%] [%LVL%] [%GRN%%BOLD%%TASK%%RST%:%FUNC%] [%CORE%]: %MSG%";
-    logger.reparse_format();
+    logger_reparse_format(logger);
 
     xTaskCreate(log_task1, "LogTask1", 1024, NULL, 1, NULL);
     xTaskCreate(log_task2, "LogTask2", 1024, NULL, 1, NULL);
     
-    logger.init_mutex();  // Initialize logger mutex to ensure thread safety
+    logger_init_mutex(logger);  // Initialize logger mutex to ensure thread safety
     vTaskStartScheduler();
 
     return 0;  // Should never reach here

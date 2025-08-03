@@ -30,9 +30,9 @@ endif ()
 include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 
 # Set project name and C/C++ standards
-project(pico_log_lib VERSION 0.1.0 LANGUAGES C CXX ASM)
+project(pico_log_lib VERSION 0.2.0 LANGUAGES C CXX ASM)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # Library options
 cmake_policy(SET CMP0077 NEW)
@@ -50,6 +50,8 @@ pico_sdk_init()
 
 # This is intended for example builds!
 if (NOT DEFINED FREERTOS_KERNEL_PATH AND PICO_LOG_FREERTOS AND PICO_LOG_BUILD_EXAMPLES)
+    message("Including FreeRTOS Kernel for examples...")
+
     # Include the FreeRTOS Kernel
     set(FREERTOS_KERNEL_PATH "${CMAKE_CURRENT_LIST_DIR}/libfreertos/FreeRTOS-Kernel" CACHE STRING "FreeRTOS Kernel Path" FORCE)
     include(FreeRTOS_Kernel_import.cmake)
