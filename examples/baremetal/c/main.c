@@ -87,7 +87,7 @@ int main() {
     LOG(LOG_LVL_INFO, "%BLU_BG%Background colors!%RST%")
 
     // Initialize logger mutex to ensure thread safety (not really threads, but cores)
-    logger_init_mutex(logger);
+    assert(logger_init_mutex(logger));
     
     // Launch core 1
     LOG(LOG_LVL_INFO, "Launching core 1...");

@@ -100,12 +100,12 @@ int main() {
 
     // Example: changing the log format after initialization
     logger_options.log_format = "[%TSTMP%] [%LVL%] [%GRN%%BOLD%%TASK%%RST%:%FUNC%] [%CORE%]: %MSG%";
-    logger.reparse_format();
+    assert(logger.reparse_format());
 
     xTaskCreate(log_task1, "LogTask1", 1024, NULL, 1, NULL);
     xTaskCreate(log_task2, "LogTask2", 1024, NULL, 1, NULL);
     
-    logger.init_mutex();  // Initialize logger mutex to ensure thread safety
+    assert(logger.init_mutex());  // Initialize logger mutex to ensure thread safety
     vTaskStartScheduler();
 
     return 0;  // Should never reach here

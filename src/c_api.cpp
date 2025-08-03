@@ -55,9 +55,9 @@ bool logger_init_mutex(logger_handle_t logger) {
     return static_cast<Logger*>(logger)->init_mutex();
 }
 
-void logger_reparse_format(logger_handle_t logger) {
+bool logger_reparse_format(logger_handle_t logger) {
     assert(logger != nullptr);
-    static_cast<Logger*>(logger)->reparse_format();
+    return static_cast<Logger*>(logger)->reparse_format();
 }
 
 void logger_log(logger_handle_t logger, const char* func, const char* file, const uint16_t line, 

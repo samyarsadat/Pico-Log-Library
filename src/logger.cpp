@@ -90,12 +90,15 @@ void Logger::vlog(LOG_LEVEL_t level, const char* message, va_list args,
     }
 }
 
-void Logger::reparse_format() {
+bool Logger::reparse_format() {
     if (this->take_log_mutex()) {
         this->clear_format_tokens();
         this->msg_format_tokenize();
         this->release_log_mutex();
+        return true
     }
+
+    return false;
 }
 
 

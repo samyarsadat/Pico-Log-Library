@@ -20,7 +20,6 @@
 */
 
 #pragma once
-#include "pico/stdlib.h"
 
 
 // Logger verbosity levels.

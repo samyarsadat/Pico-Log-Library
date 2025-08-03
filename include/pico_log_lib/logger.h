@@ -68,7 +68,7 @@ class Logger {
                  LOG_LEVEL_t level, const char* message, ...);
         void vlog(LOG_LEVEL_t level, const char* message, va_list args, 
                   const char* func, const char* file, const uint16_t line);
-        void reparse_format();
+        bool reparse_format();
     
     private:
         stdio_driver_t* stdio_driver;

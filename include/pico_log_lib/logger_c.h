@@ -73,8 +73,10 @@ extern "C" {
      * It should be called if the format string associated with the logger has changed.
      *
      * @param logger Logger object handle.
+     * @return true if the format was successfully reparsed,
+     *         false if the mutex could not be acquired.
      */
-    void logger_reparse_format(logger_handle_t logger);
+    bool logger_reparse_format(logger_handle_t logger);
     
     /**
      * @brief Logs a formatted message with the specified log verbosity.
