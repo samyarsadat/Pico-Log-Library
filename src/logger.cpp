@@ -38,7 +38,8 @@ Logger::Logger(stdio_driver_t* stdio_driver, logger_options_t* options) {
 Logger::~Logger() {
     #ifdef PICO_LOG_FREERTOS
     if (this->log_mutex != nullptr) {
-        xSemaphoreTake(this->log_mutex, portMAX_DELAY);
+        // Wait for a maximum of 500 ticks to take the mutex.
+        (void) xSemaphoreTake(this->log_mutex, 500);
         vSemaphoreDelete(this->log_mutex);
         this->log_mutex = nullptr;
     }
@@ -49,9 +50,7 @@ bool Logger::init_mutex() {
     #ifdef PICO_LOG_FREERTOS
     if (this->log_mutex == nullptr) {
         this->log_mutex = xSemaphoreCreateMutex();
-        if (this->log_mutex == nullptr) {
-            return false;
-        }
+        return this->log_mutex != nullptr;
     }
     #else
     if (!this->mutex_initialized) {
@@ -408,7 +407,7 @@ inline size_t Logger::msg_process_format(char* buff, const size_t buff_size, con
 
     if (buff_pos >= 1) {
         buff[buff_pos - 1] = '\r';
-        buff[buff_pos] = '\n';
+        buff[buff_pos]     = '\n';
     }
 
     return buff_pos + 1;

@@ -52,7 +52,7 @@ typedef struct {
 } logger_options_t;
 ```
 
-`LOG_LEVEL logging_level`:\
+`LOG_LEVEL_t logging_level`:\
 The minimum severity required for a message to be logged.\
 Note that the following verbosity levels are available:
 ```c
@@ -121,7 +121,7 @@ pico_enable_stdio_uart(${PROJECT_NAME} 1)
 
 You must also call `stdio_init_all()` before using the logger to initialize the STDIO output (there are functions for specifically initializing UART STDIO or USB STDIO, but calling `stdio_init_all()` is the recommended approach).
 
-If you want the output of the logger to be output to some other destination, you can declare your own `stdio_driver` structure. You only need to provide an implementation for `void (*out_chars)(const char *buf, int len)`, as that is the function used by the logger to output messages.
+If you want log messages to be output to some other destination, you can declare your own `stdio_driver` structure. You only need to provide an implementation for `void (*out_chars)(const char *buf, int len)`, as that is the function used by the logger to output messages.
 
 <br>
 
