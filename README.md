@@ -45,7 +45,7 @@ The logger’s configuration options are set using the `logger_options` structur
 
 ```c
 typedef struct {
-    LOG_LEVEL logging_level;
+    LOG_LEVEL_t logging_level;
     const char* log_format;
     bool ansi_styling;
     bool process_style_tags;
