@@ -65,8 +65,8 @@ class Logger {
 
         bool init_mutex();
         void log(const char* func, const char* file, const uint16_t line, 
-                 LOG_LEVEL_t level, const char* message, ...);
-        void vlog(LOG_LEVEL_t level, const char* message, va_list args, 
+                 const LOG_LEVEL_t level, const char* message, ...);
+        void vlog(const LOG_LEVEL_t level, const char* message, va_list args, 
                   const char* func, const char* file, const uint16_t line);
         bool reparse_format();
     
@@ -137,7 +137,7 @@ class Logger {
         void clear_format_tokens();
         
         inline color_spec_t process_color_spec(const COLOR color, const char* &src_ptr, const size_t ptr_skip);
-        inline size_t msg_process_format(char* buff, const size_t buff_size, const char* msg, LOG_LEVEL_t level, 
+        inline size_t msg_process_format(char* buff, const size_t buff_size, const char* msg, const LOG_LEVEL_t level, 
                                          const char* func, const char* file, const uint16_t line);
         inline void msg_process_style(const char* src_ptr, char* buff, const size_t buff_size);
         

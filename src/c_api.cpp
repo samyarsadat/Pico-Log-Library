@@ -61,7 +61,7 @@ bool logger_reparse_format(logger_handle_t logger) {
 }
 
 void logger_log(logger_handle_t logger, const char* func, const char* file, const uint16_t line, 
-                LOG_LEVEL_t level, const char* message, ...) {
+                const LOG_LEVEL_t level, const char* message, ...) {
     assert(logger != nullptr);
     va_list args;
     va_start(args, message);
@@ -69,7 +69,7 @@ void logger_log(logger_handle_t logger, const char* func, const char* file, cons
     va_end(args);
 }
 
-void logger_vlog(logger_handle_t logger, LOG_LEVEL_t level, const char* message, va_list args, 
+void logger_vlog(logger_handle_t logger, const LOG_LEVEL_t level, const char* message, va_list args, 
                  const char* func, const char* file, const uint16_t line) {
     assert(logger != nullptr);
     static_cast<Logger*>(logger)->vlog(level, message, args, func, file, line);

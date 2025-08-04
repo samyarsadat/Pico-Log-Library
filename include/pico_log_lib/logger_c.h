@@ -92,7 +92,7 @@ extern "C" {
      * @param message Log message (supports format specifiers).
      */
     void logger_log(logger_handle_t logger, const char* func, const char* file, const uint16_t line, 
-                    LOG_LEVEL_t level, const char* message, ...);
+                    const LOG_LEVEL_t level, const char* message, ...);
     
     /**
      * @brief Logs a formatted message with the specified log verbosity.
@@ -107,7 +107,7 @@ extern "C" {
      * @param file Source file name where the log is called.
      * @param line Line number in the source file where the log is called.
      */
-    void logger_vlog(logger_handle_t logger, LOG_LEVEL_t level, const char* message, va_list args, 
+    void logger_vlog(logger_handle_t logger, const LOG_LEVEL_t level, const char* message, va_list args, 
                      const char* func, const char* file, const uint16_t line);    
 #ifdef __cplusplus
 }

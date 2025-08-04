@@ -62,14 +62,14 @@ bool Logger::init_mutex() {
     return true;
 }
 
-void Logger::log(const char* func, const char* file, const uint16_t line, LOG_LEVEL_t level, const char* message, ...) {
+void Logger::log(const char* func, const char* file, const uint16_t line, const LOG_LEVEL_t level, const char* message, ...) {
     va_list args;
     va_start(args, message);
     this->vlog(level, message, args, func, file, line);
     va_end(args);
 }
 
-void Logger::vlog(LOG_LEVEL_t level, const char* message, va_list args, 
+void Logger::vlog(const LOG_LEVEL_t level, const char* message, va_list args, 
                   const char* func, const char* file, const uint16_t line) {
     assert(func != nullptr && file != nullptr && message != nullptr);
     
@@ -334,7 +334,7 @@ void Logger::clear_format_tokens() {
     }                                                                                      \
     continue;
 
-inline size_t Logger::msg_process_format(char* buff, const size_t buff_size, const char* msg, LOG_LEVEL_t level, 
+inline size_t Logger::msg_process_format(char* buff, const size_t buff_size, const char* msg, const LOG_LEVEL_t level, 
                                          const char* func, const char* file, const uint16_t line) {
     size_t token_len, str_len, buff_pos_size_n, buff_pos = 0;
     uint32_t ms_since_boot, timestamp_sec;
